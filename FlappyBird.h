@@ -37,7 +37,7 @@ private:
 };
 
 sf::FloatRect Ptak::getGlobalBounds() {
-	bounds_ptak = sprite_ptak.getGlobalBounds();
+	return sprite_ptak.getGlobalBounds();
 }
 
 
@@ -126,7 +126,7 @@ private:
 unsigned int Rura::last_id = 0;
 
 sf::FloatRect Rura::getGlobalBounds() {
-	bounds_rura = sprite_rura.getGlobalBounds();
+	return sprite_rura.getGlobalBounds();
 }
 
 
@@ -175,7 +175,7 @@ void Rura::update() {
 }
 
 void Wygeneruj_rury(std::pair<Rura, Rura>& Para_rur, sf::Vector2f pozycja, std::string texture_rura) {
-	const float rozmiar_szpary = 100.f; //trzeba zaimprementowac jako parametr
+	const float rozmiar_szpary = 300.f; //trzeba zaimprementowac jako parametr
 
 	Para_rur.first = Rura{ {pozycja.x, pozycja.y + rozmiar_szpary * 0.5f }, NORMAL };
 	Para_rur.second = Rura{ {pozycja.x, pozycja.y - rozmiar_szpary * 0.5f }, ROTATED };

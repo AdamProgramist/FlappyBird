@@ -10,27 +10,27 @@ int main() {
 
 	Ptak ptak({ 400.0f, 500.0f });
 	ptak.load_texture("duch.png");
-	
 
-	
 
-	Rura rura({ 450.0f, 600.0f }, NORMAL);
-	rura.load_texture("rura.png");
+
+
+	//Rura rura({ 450.0f, 600.0f }, NORMAL);
+	//rura.load_texture("rura.png");
 	std::vector<std::pair<Rura, Rura>> Para_rur(ilosc_rur);
-	for (int i = 0; i < ilosc_rur ; i++)
+	for (int i = 0; i < ilosc_rur; i++)
 	{
-	Wygeneruj_rury(Para_rur[i], {1000.f+i*500.f, 500.f}, "rura.png");
+		Wygeneruj_rury(Para_rur[i], { 1000.f + i * 500.f, 500.f }, "rura.png");
 	}
-	
+
 	Tlo tlo({ 500.0f, 500.0f });
 	tlo.load_texture("tlo.png");
-	
+
 
 	sf::Clock clock;
 	sf::Time elapsedTime;
 
-	
-	
+
+
 
 	clock.restart();
 	while (window.isOpen()) {
@@ -51,7 +51,7 @@ int main() {
 			return rect1.intersects(rect2);
 		}*/
 		//napisac if kolizji uzywajac getGlobalBounds().instects(obiekt.getGlobalBounds());
-		
+
 		window.clear(sf::Color::Blue);
 
 		elapsedTime = clock.restart();
@@ -63,31 +63,34 @@ int main() {
 		//rura.oblicz_przesuniecie(elapsedTime.asSeconds());
 		for (int i = 0; i < ilosc_rur; i++)
 		{
-		Para_rur[i].first.oblicz_przesuniecie(elapsedTime.asSeconds());
-		Para_rur[i].second.oblicz_przesuniecie(elapsedTime.asSeconds());
+			Para_rur[i].first.oblicz_przesuniecie(elapsedTime.asSeconds());
+			Para_rur[i].second.oblicz_przesuniecie(elapsedTime.asSeconds());
 
-		window.draw(Para_rur[i].first);
-		window.draw(Para_rur[i].second);
+			window.draw(Para_rur[i].first);
+			window.draw(Para_rur[i].second);
 
-		if (ptak.getGlobalBounds().intersects(Para_rur[i].getGlobalBounds())) {
-			std::cout << "Dotknalem" << std::endl;
-		}
+			if (ptak.getGlobalBounds().intersects(Para_rur[i].first.getGlobalBounds())) {
+				std::cout << "Dotknalem dol" << std::endl;
+			}
+			else if (ptak.getGlobalBounds().intersects(Para_rur[i].second.getGlobalBounds())) {
+				std::cout << "Dotknalem gore" << std::endl;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
 			ptak.skok();
 		}
-		
 
-		
+
+
 		window.draw(ptak);
 
-		
 
-		window.draw(rura);
 
-		
-		
+		//window.draw(rura);
+
+
+
 
 		window.display();
 	}
