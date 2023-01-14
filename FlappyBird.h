@@ -4,8 +4,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+
 const float gravity = 15.0f;
 const float pipe_velocity = -100.f;
+const float odleglosc_miedzy_rurami = 1000.f;
+
+class Asset {
+public:
+
+
+};
 
 class Ptak {
 public:
@@ -15,8 +23,7 @@ public:
 	void load_texture(std::string t);
 	void oblicz_pozycje(float dt);
 	void skok();
-	//void dostep();//wyciagnac sprite z private do public zeby miec do niego dostep
-	
+
 
 	operator sf::Sprite& () { update(); return sprite_ptak; };
 
@@ -31,8 +38,8 @@ private:
 	sf::Texture texture_ptak;
 	sf::Sprite sprite_ptak;
 	sf::FloatRect bounds_ptak;
-	
-	
+
+
 	void update();
 };
 
@@ -51,7 +58,7 @@ Ptak::Ptak(sf::Vector2f p) {
 void Ptak::load_texture(std::string t) {
 	texture_ptak.loadFromFile(t);
 	sprite_ptak.setTexture(texture_ptak);
-	
+
 	sf::Vector2f rozmiar_sprite;
 	rozmiar_sprite.x = texture_ptak.getSize().x;
 	rozmiar_sprite.y = texture_ptak.getSize().y;
@@ -73,7 +80,7 @@ void Ptak::oblicz_pozycje(float dt) {
 	pozycja.x += przesuniecie.x;
 	pozycja.y += przesuniecie.y;
 
-	
+
 	kat_pochylenia = atan2(predkosc.y, -pipe_velocity) * 180.f / M_PI;
 }
 
@@ -90,26 +97,31 @@ void Ptak::update() {
 
 //////////////////////////////////////////////////////////////////////
 enum pipe_type {
-	NORMAL, ROTATED
+	NORMAL = 0, ROTATED = 1
 };
 
 class Rura {
 public:
-	
+	~Rura();
+
 	Rura();
 	Rura(sf::Vector2f p, pipe_type r);
 
 	void load_texture(std::string t);
+	void load_texture(sf::Texture *t);
 	void oblicz_przesuniecie(float dt);
-	//void dostep();//wyciagnac sprite z private do public zeby miec do niego dostep
-	void hitbox();
+
+	static unsigned int getIlosc_rur() { return ilosc_rur; };
 
 	operator sf::Sprite& () { update(); return sprite_rura; };
+	operator bool() { return czy_wyszla; };
 
 	sf::FloatRect getGlobalBounds();
 
+
 protected:
 	static unsigned int last_id;
+	static unsigned int ilosc_rur;
 
 private:
 	pipe_type rodzaj;
@@ -119,31 +131,41 @@ private:
 	sf::Sprite sprite_rura;
 	sf::FloatRect bounds_rura;
 
+	bool czy_wyszla = 0;
+
 	void update();
 
 };
 
 unsigned int Rura::last_id = 0;
+unsigned int Rura::ilosc_rur = 0;
 
 sf::FloatRect Rura::getGlobalBounds() {
 	return sprite_rura.getGlobalBounds();
 }
 
+Rura::~Rura() {
+	ilosc_rur--;
+}
 
 Rura::Rura() {
 	pozycja = { 2000.f, 1000.f };
-	
+
 	id = last_id++;
+
+	ilosc_rur++;
 }
 
 Rura::Rura(sf::Vector2f p, pipe_type r) {
 	pozycja = p;
 	rodzaj = r;
 
-	
+
 
 
 	id = last_id++;
+
+	ilosc_rur++;
 }
 
 void Rura::load_texture(std::string t) {
@@ -163,27 +185,48 @@ void Rura::load_texture(std::string t) {
 	}
 	else if (rodzaj == NORMAL)
 		pozycja.y += texture_rura.getSize().y * 0.5f;
-	
+
+}
+
+void Rura::load_texture(sf::Texture *t) {
+	sprite_rura.setTexture(*t);
+	sprite_rura.setScale({ 0.5f, 1.f });
+
+	sf::Vector2f rozmiar_sprite;
+	rozmiar_sprite.x = texture_rura.getSize().x;
+	rozmiar_sprite.y = texture_rura.getSize().y;
+
+	std::cout << "x: " << rozmiar_sprite.x << "y: " << rozmiar_sprite.y << std::endl;
+
+	sprite_rura.setOrigin(rozmiar_sprite.x * 0.5f, rozmiar_sprite.y * 0.5f);
+
+	if (rodzaj == ROTATED) {
+		sprite_rura.setRotation(180.f);
+		pozycja.y -= texture_rura.getSize().y * 0.5f;
+	}
+	else if (rodzaj == NORMAL)
+		pozycja.y += texture_rura.getSize().y * 0.5f;
+
 }
 
 void Rura::oblicz_przesuniecie(float dt) {
 	pozycja.x += pipe_velocity * dt;
+
+	if (pozycja.x <= -200.f)
+		czy_wyszla = 1;
 }
 
 void Rura::update() {
 	sprite_rura.setPosition(pozycja);
 }
 
-void Wygeneruj_rury(std::pair<Rura, Rura>& Para_rur, sf::Vector2f pozycja, std::string texture_rura) {
-	const float rozmiar_szpary = 300.f; //trzeba zaimprementowac jako parametr
+std::pair<Rura, Rura> Wygeneruj_rury(sf::Vector2f pozycja, float rozmiar_szpary = 300.f) {
 
+	std::pair<Rura, Rura> Para_rur;
 	Para_rur.first = Rura{ {pozycja.x, pozycja.y + rozmiar_szpary * 0.5f }, NORMAL };
 	Para_rur.second = Rura{ {pozycja.x, pozycja.y - rozmiar_szpary * 0.5f }, ROTATED };
-	Para_rur.first.load_texture(texture_rura);
-	Para_rur.second.load_texture(texture_rura);
-	Para_rur.first.getGlobalBounds();
-	Para_rur.second.getGlobalBounds();
 
+	return Para_rur;
 }
 ////////////////////////////////////////////////////////////////////////////////////
 class Tlo {
@@ -191,7 +234,7 @@ public:
 	Tlo(sf::Vector2f p);
 
 	void load_texture(std::string t);
-	
+
 
 	operator sf::Sprite& () { update(); return sprite_tlo; };
 
@@ -224,3 +267,4 @@ void Tlo::update() {
 	sprite_tlo.setPosition(pozycja);
 }
 
+/////////////////////////////////////////////
