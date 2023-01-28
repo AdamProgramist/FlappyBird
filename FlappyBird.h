@@ -7,13 +7,8 @@
 
 const float gravity = 15.0f;
 const float pipe_velocity = -100.f;
-const float odleglosc_miedzy_rurami = 1000.f;
+const float odleglosc_miedzy_rurami = 500.f;
 
-class Asset {
-public:
-
-
-};
 
 class Ptak {
 public:
@@ -24,6 +19,7 @@ public:
 	void oblicz_pozycje(float dt);
 	void skok();
 
+	float getDistance() { return przebyt_dystans; };
 
 	operator sf::Sprite& () { update(); return sprite_ptak; };
 
@@ -35,10 +31,11 @@ private:
 	sf::Vector2f pozycja;
 	sf::Vector2f predkosc;
 	sf::Vector2f przyspieszenie;
-	sf::Texture texture_ptak;
 	sf::Sprite sprite_ptak;
+	sf::Texture texture_ptak;
 	sf::FloatRect bounds_ptak;
 
+	float przebyt_dystans = 0;
 
 	void update();
 };
@@ -80,6 +77,7 @@ void Ptak::oblicz_pozycje(float dt) {
 	pozycja.x += przesuniecie.x;
 	pozycja.y += przesuniecie.y;
 
+	przebyt_dystans += -pipe_velocity * dt;
 
 	kat_pochylenia = atan2(predkosc.y, -pipe_velocity) * 180.f / M_PI;
 }
@@ -221,7 +219,7 @@ void Rura::update() {
 }
 
 std::pair<Rura, Rura> Wygeneruj_rury(sf::Vector2f pozycja, float rozmiar_szpary = 300.f) {
-
+	
 	std::pair<Rura, Rura> Para_rur;
 	Para_rur.first = Rura{ {pozycja.x, pozycja.y + rozmiar_szpary * 0.5f }, NORMAL };
 	Para_rur.second = Rura{ {pozycja.x, pozycja.y - rozmiar_szpary * 0.5f }, ROTATED };
@@ -266,5 +264,5 @@ void Tlo::load_texture(std::string t) {
 void Tlo::update() {
 	sprite_tlo.setPosition(pozycja);
 }
-
 /////////////////////////////////////////////
+
